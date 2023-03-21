@@ -17,8 +17,8 @@ Komponenten / Verlauf:
 2. Funktionen
     a. Das Video Skalieren
     b. Das Video zu schwarz weiß Konvertieren
-    c. Den Kontrast des Videos erhöhen, sodass das ganze in der umwandlung gut dichtbar ist
-    d. Die Framerat des Videos verringern und somit den specher des ganzen minimieren
+    c. Den Kontrast des Videos erhöhen, sodass das ganze in der umwandlung gut sichtbar ist
+    d. Die Framerat des Videos verringern und somit den speicher des ganzen minimieren
     e. Das Video in seine einzelnen Frames aufteilen
     f. eine mapping bethode finden, um bestimmten pixelbereichen im Video passende buchstaben und ahlen zu zu Ordnen
         I. Sämmtliche Zeichen erstellen und bestimmen was der helligkeits wert von ihnen im Rahmen von einer CMD Umgebung ist
