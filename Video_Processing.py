@@ -4,13 +4,13 @@ from PIL import Image, ImageDraw, ImageFont
 from numpy.linalg import norm
 import numpy as np
 from sys import getsizeof
-
-
-
+import math
+import pickle
 import ffmpeg
 import os
 from pathlib import Path
 from time import sleep
+
 
 class bcolors:
     HEADER = '\033[95m'
@@ -23,9 +23,10 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 class VideoCapture:
-    #__ = privat
-    #_ = geschützt
+    # __ = privat
+    # _ = geschützt
     def __init__(self, path, fps):
         if fps <= 0:
             fps = 1
@@ -33,10 +34,10 @@ class VideoCapture:
         self.__path = path
         self.__fps = fps
         self.__vidFrames = []
-        #self.__vidFrames1 = 0
+        # self.__vidFrames1 = 0
 
     def VideoToImages(self, newVideoWidth=800):
-        #newVideoWidth in pixeln
+        # newVideoWidth in pixeln
         stream = cv2.VideoCapture(self.__path)
         currentFrame = 0
         maxFrames = stream.get(7)
@@ -49,7 +50,7 @@ class VideoCapture:
             print(bcolors.WARNING + f"Warning: FPS above Video file --> set to {stream.get(5)}" + bcolors.ENDC)
 
         maxNewFrames = round(1 / stream.get(5) * self.__fps * maxFrames)
-        framesToSkip  = round(maxFrames / maxNewFrames)
+        framesToSkip = round(maxFrames / maxNewFrames)
 
         print(bcolors.HEADER + "-----------------------------------------" + bcolors.ENDC)
         print(bcolors.HEADER + "Video Info              New Video Info" + bcolors.ENDC)
@@ -69,16 +70,15 @@ class VideoCapture:
             # Wenn das Video zu ende ist , hört das ganze auf
             if frame is not None:
                 if currentFrame % framesToSkip == 0 or currentFrame == 0:
-
                     # define the alpha and beta
-                    #alpha = 1.5  # Contrast control
-                    #beta = 1  # Brightness control
+                    # alpha = 1.5  # Contrast control
+                    # beta = 1  # Brightness control
                     # call convertScaleAbs function
-                    #frame = cv2.convertScaleAbs(frame, alpha=alpha, beta=beta)
+                    # frame = cv2.convertScaleAbs(frame, alpha=alpha, beta=beta)
 
                     resized = cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
                     greyFrame = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-                    #Speichert alle frames
+                    # Speichert alle frames
                     cv2.imwrite(f"BadApple/{currentFrame}.jpg", greyFrame)
                     self.__vidFrames.append(greyFrame)
 
@@ -87,12 +87,9 @@ class VideoCapture:
                 print(bcolors.UNDERLINE + f"\nFrames in List: {len(self.__vidFrames)}" + bcolors.ENDC)
                 print("Finished reading video file\n+++")
 
-
-                #print(f"Original Size: {getsizeof(self.__vidFrames)}")
-                #self.__vidFrames1 = np.array(self.__vidFrames, np.int8)
-                #print(f"Numpy Size: {getsizeof(self.__vidFrames1)}")
-
-
+                # print(f"Original Size: {getsizeof(self.__vidFrames)}")
+                # self.__vidFrames1 = np.array(self.__vidFrames, np.int8)
+                # print(f"Numpy Size: {getsizeof(self.__vidFrames1)}")
 
                 break
 
@@ -104,31 +101,49 @@ class ImageToText:
     def __init__(self, path, skip, chunk):
         self.__path = path
         self.__frameCount = len(os.listdir(path))
-        print(f"Frames: {self.__frameCount}")
-        self.__frameList = []
-        self.__skip = skip # Für die FPS, bekommt man von VideoToImages framesToSkip
+        self.__skip = skip  # Für die FPS, bekommt man von VideoToImages framesToSkip
+        self.__frameList = self.GetImages()
         self.__chunk_dim = chunk
+        self.charSet = [' ', '.', '/', '%']
+        self.charFrameSet = []
+        self.__globalCounter = 0
+
+    def Start(self):
+        write = False
+        read = True
+
+
+        if write:
+            for img in self.__frameList:
+                self.PicToRGB(img)
+
+            with open("save1", "wb") as file:
+                pickle.dump(self.charFrameSet, file)
+
+        if read:
+            with open("save1", "rb") as file:
+                self.charFrameSet = pickle.load(file)
+
+            for frame in self.charFrameSet:
+                sleep(.1)
+                for row in frame:
+                    print(row)
+
+
 
     def GetImages(self):
-        for frame in range(0, self.__frameCount*self.__skip):
+        imgList = []
+        for frame in range(0, self.__frameCount * self.__skip):
             if frame % self.__skip == 0 or frame == 0:
-                #print(frame)
+                # print(frame)
                 img = cv2.imread(os.path.join(self.__path, f"{frame}.jpg"))
-                self.__frameList.append(img)
-        print(len(self.__frameList))
+                imgList.append(img)
+        return imgList
 
-
-
-
-
-    def PicToRGB(self):
-
-
-        charSet = [' ', '.', '/', '%']
-        img = cv2.imread(os.path.join(self.__path, f"{54}.jpg"))
+    def PicToRGB(self, img):
         dim = self.__chunk_dim
-        #y, x
-        #print(img[599, 799])
+        # y, x
+        # print(img[599, 799])
 
         chunk_array = []
         for y in range(0, img.shape[0]):
@@ -136,45 +151,58 @@ class ImageToText:
                 chunk_row = []
                 for x in range(0, img.shape[1]):
                     if x % dim == 0 or x == 0:
-                        #Chunk aufbau= y1: x1, x2, x3, x4, x5
+                        # Chunk aufbau= y1: x1, x2, x3, x4, x5
                         #              y2: x1, x2, x3, x4, x5
                         #              y3: x1, x2, x3, x4, x5
                         #              y4: x1, x2, x3, x4, x5
                         #              y5: x1, x2, x3, x4, x5
-                        chunk = img[y:y+dim, x:x+dim]
+                        chunk = img[y:y + dim, x:x + dim]
 
-                        #Bei der Addition ist zu beachten, das der Wertebereich 2^8 (rgb Wertebereich) deswegen /(chunk größe)
-                        row = chunk[0, :, 0]/dim + chunk[1, :, 0]/dim + chunk[2, :, 0]/dim + \
-                              chunk[3, :, 0]/dim + chunk[4, :, 0]/dim
-                        #print(row)
+                        # Bei der Addition ist zu beachten, das der Wertebereich 2^8 (rgb Wertebereich) deswegen /(chunk größe)
+                        row = chunk[0, :, 0] / dim + chunk[1, :, 0] / dim + chunk[2, :, 0] / dim + \
+                              chunk[3, :, 0] / dim + chunk[4, :, 0] / dim
+                        # print(row)
                         row_sum = 0
                         for rgb in row:
                             row_sum += rgb
                         row_sum = round(row_sum / dim)
-                        #print(row_sum)
+                        # print(row_sum)
                         chunk_row.append(row_sum)
-                chunk_array.append(chunk_row)
+                if y % 2 or y == 0:
+                    chunk_array.append(chunk_row)
+                    #print(y)
+        self.RGBToChar(RGB_set=chunk_array)
 
-        for row in chunk_array:
-            print(row)
+    def RGBToChar(self, RGB_set):
+        #print(len(self.charSet))
+        calc = 255 / len(self.charSet)
+        char_array = []
 
+        for row in RGB_set:
+            char_row = []
+            string_row = ""
+            for value in row:
+                if value == 0: value = 0.1
+                value_r = math.ceil(value / calc)
+                # string_row = string_row.join("Das")
+                char_row.append(self.charSet[value_r-1])
+                #char_row.append(value_r - 1)
+                string_row += self.charSet[value_r-1]
+            #char_array.append(char_row)
+            char_array.append(string_row)
 
-
-
-
-
-
-
-
-
-
+        # for row in char_array:
+        #    print(row)
+        print(end="\r" + f"Frame: {self.__globalCounter} von {self.__frameCount}")
+        self.__globalCounter += 1
+        self.charFrameSet.append(char_array)
 
 
 class ImageTester:
 
     def __init__(self):
         self.__testCharList = [' ', '"', ',', '#', '+', '*', '-', 'S', 'A', 'D', '.', 'ß', '?', '§', '$', '%',
-                        'M', 'N', 'Y', '/', 'Q', 'q', 'a', 'c', 'o', '<', '>', '|']
+                               'M', 'N', 'Y', '/', 'Q', 'q', 'a', 'c', 'o', '<', '>', '|']
 
     def TestPicturesChar(self):
         counter = 0
@@ -191,21 +219,26 @@ class ImageTester:
             counter += 1
         print("Test images created")
 
+
 print()
 
-
-
 if __name__ == '__main__':
-    #start = VideoCapture('media/BadApple.mp4', 5)
-    #start.VideoToImages()
-    #imager = ImageTester()
-    #imager.TestPicturesChar()
+
+
+
+    # start = VideoCapture('media/BadApple.mp4', 5)
+    # start.VideoToImages()
+    # imager = ImageTester()
+    # imager.TestPicturesChar()
 
     texter = ImageToText('./BadApple/', 6, 5)
-    texter.PicToRGB()
+    texter.Start()
+    #img = cv2.imread(os.path.join('./BadApple/', f"{54}.jpg"))
+    #texter.PicToRGB(img)
+    #texter.Calc()
 
+    # arr = []
 
-
-
-
-
+    # for i in range(0, 10):
+    #    arr.append(i)
+    # print(arr)
