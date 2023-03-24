@@ -6,7 +6,6 @@ import numpy as np
 from sys import getsizeof
 import math
 import pickle
-import ffmpeg
 import os
 from pathlib import Path
 from time import sleep
@@ -44,6 +43,7 @@ class VideoCapture:
     def VideoToImages(self, newVideoWidth=800):
         # newVideoWidth in pixeln
         stream = cv2.VideoCapture(self.__path)
+
         currentFrame = 0
         maxFrames = stream.get(7)
         dimXalt = newVideoWidth
@@ -133,7 +133,7 @@ class ImageToText:
             pickle.dump(self.charFrameSet, file)
 
     def Start(self):
-        with open("save1", "rb") as file:
+        with open("saves/BadApple", "rb") as file:
             self.charFrameSet = pickle.load(file)
 
         frameList = []
@@ -244,6 +244,11 @@ class ImageTester:
 
 
 if __name__ == '__main__':
+    #vid = VideoCapture('media/BadApple.mp4', 5)
+    #vid.VideoToImages()
+
     texter = ImageToText('./BadApple/', 6, 5)
-    texter.WriteCharFramesToFile()
+    #texter.WriteCharFramesToFile()
+    texter.Start()
+
 

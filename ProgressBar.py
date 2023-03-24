@@ -1,8 +1,8 @@
 import math
 import time
 import sys
-import curses
-from curses import wrapper
+#import curses
+#from curses import wrapper
 
 
 class ProgressBar:
@@ -29,7 +29,7 @@ class ProgressBar:
         print(end='\r' f"{pref}: [{'#' * pro}{'.' * rem}] {increase}/{self.__maxSteps}  {iops} IOPS/s ")
 
     #Python Curses <-- WICHTIG!!!!!
-    def progressBarMk2(self, increase: list, chunks:int):
+    '''def progressBarMk2(self, increase: list, chunks:int):
         proList = []
         incCounter = 0
         for inc in increase:
@@ -47,16 +47,16 @@ class ProgressBar:
         sys.stdout.flush()
 
 
-        print(end="\r")
+        print(end="\r")'''
 
 
 
-print()
-progressBar = ProgressBar(300, 10)
+#print()
+#progressBar = ProgressBar(300, 10)
 
-print("Hallo\nHallo\nHallo\nHallo")
-print("Test", end='\r')
-print(end='\r' + "Ho\nHo\nHo\nHo")
+#print("Hallo\nHallo\nHallo\nHallo")
+#print("Test", end='\r')
+#print(end='\r' + "Ho\nHo\nHo\nHo")
 
 #a = 0
 #for x in range (0,3):
@@ -76,7 +76,7 @@ def main(stdscr):
     stdscr.refresh()
     stdscr.getch()
 
-wrapper(main)
+#wrapper(main)
 
 
 
