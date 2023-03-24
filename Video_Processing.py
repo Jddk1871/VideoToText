@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 from time import sleep
 import sys
+import ProgressBar
 
 
 
@@ -102,7 +103,7 @@ class VideoCapture:
 
 class ImageToText:
 
-    def __init__(self, path, skip, chunk):
+    def __init__(self, path: str, skip: int, chunk: int):
         self.__path = path
         self.__savePath = "./saves/" + path.split('/')[-2]
         self.__frameCount = len(os.listdir(path))
@@ -113,30 +114,17 @@ class ImageToText:
         self.charFrameSet = []
         self.__globalCounter = 0
 
-    def progressbar(self, it = [1, 2, 3, 4, 5, 6, 7, 8, 9], prefix="", size=60, out=sys.stdout):  # Python3.3+
-        count = len(it)
-
-        def show(j):
-            x = int(size * j / count)
-            print("{}[{}{}] {}/{}".format(prefix, "#" * x, "." * (size - x), j, count),
-                  end='\r', file=out, flush=True)
-
-        show(0)
-        for i, item in enumerate(it):
-            yield item
-            show(i + 1)
-        print("\n", flush=True, file=out)
 
     def WriteCharFramesToFile(self):
         #for i in self.progressbar(range(15), "Computing: ", 40):
         #    sleep(0.5)  # any code you need
-
-
+        pBar = ProgressBar.ProgressBar(self.__frameCount, 50)
         img_counter = 1
         print(bcolors.HEADER + "Convert Images to Char Images" + bcolors.ENDC)
         print()
         for img in self.__frameList:
-            print(end="\r" f"Frames: {img_counter} von {self.__frameCount}")
+            pBar.progressBarMk2(img_counter)
+            #print(end="\r" f"Frames: {img_counter} von {self.__frameCount}")
             self.PicToRGB(img)
             img_counter += 1
         print(bcolors.OKGREEN + "Convert: Complete" + bcolors.ENDC)
@@ -144,27 +132,25 @@ class ImageToText:
         with open(self.__savePath, "wb") as file:
             pickle.dump(self.charFrameSet, file)
 
-    def Start(self, read):
+    def Start(self):
+        with open("save1", "rb") as file:
+            self.charFrameSet = pickle.load(file)
 
-        if read:
-            with open("save1", "rb") as file:
-                self.charFrameSet = pickle.load(file)
+        frameList = []
 
-            frameList = []
+        for frame in self.charFrameSet:
+            #sleep(.1)
+            frame1 = ""
+            for row in frame:
+                #print(row)
+                frame1 += f"{row}"
+            frameList.append(frame1)
 
-            for frame in self.charFrameSet:
-                #sleep(.1)
-                frame1 = ""
-                for row in frame:
-                    #print(row)
-                    frame1 += f"{row}"
-                frameList.append(frame1)
-
-            clear = lambda: os.system('cls')
-            for frame in frameList:
-                #clear()
-                print(frame, flush=True)
-                sleep(.1)
+        clear = lambda: os.system('cls')
+        for frame in frameList:
+            #clear()
+            print(frame, flush=True)
+            sleep(.1)
 
 
     def GetImages(self):
@@ -259,6 +245,5 @@ class ImageTester:
 
 if __name__ == '__main__':
     texter = ImageToText('./BadApple/', 6, 5)
-    #texter.WriteCharFramesToFile()
-    texter.Start(True)
+    texter.WriteCharFramesToFile()
 
