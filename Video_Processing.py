@@ -1,15 +1,12 @@
 import cv2
 import multiprocessing as mp
 from PIL import Image, ImageDraw, ImageFont
-from numpy.linalg import norm
 import numpy as np
 from sys import getsizeof
 import math
 import pickle
 import os
-from pathlib import Path
 from time import sleep
-import sys
 import ProgressBar
 
 
@@ -36,6 +33,8 @@ class VideoCapture:
             fps = 1
             print(bcolors.WARNING + "Warning: FPS below 0 --> set to 1" + bcolors.ENDC)
         self.__path = path
+        self.__imPath = "Frames/" + str(self.__path.split('.')[-2]).split('/')[-1]
+        print(self.__imPath)
         self.__fps = fps
         self.__vidFrames = []
         # self.__vidFrames1 = 0
@@ -68,6 +67,9 @@ class VideoCapture:
         # Video abfangen und in einzelne frames aufteilen
         print("+++")
         print("Reading Video file (resize + grey scale + fps crop)")
+        if not os.path.exists(self.__imPath):
+            os.makedirs(self.__imPath)
+
         while (stream.isOpened()):
             print(end="\r" f"Current Frame: {currentFrame} von {maxFrames}")
             ret, frame = stream.read()
@@ -84,7 +86,7 @@ class VideoCapture:
                     resized = cv2.resize(frame, dim, interpolation=cv2.INTER_AREA)
                     greyFrame = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
                     # Speichert alle frames
-                    cv2.imwrite(f"BadApple/{currentFrame}.jpg", greyFrame)
+                    cv2.imwrite(f"{self.__imPath}/{currentFrame}.jpg", greyFrame)
                     self.__vidFrames.append(greyFrame)
 
             else:
@@ -97,7 +99,6 @@ class VideoCapture:
                 # print(f"Numpy Size: {getsizeof(self.__vidFrames1)}")
 
                 break
-
             currentFrame += 1
 
 
@@ -111,6 +112,7 @@ class ImageToText:
         self.__frameList = self.GetImages()
         self.__chunk_dim = chunk
         self.charSet = [' ', '.', '/', '%']
+        self.charSet = [' ', '"', ',', '(', 'S', '#', '@']
         self.charFrameSet = []
         self.__globalCounter = 0
 
@@ -127,13 +129,14 @@ class ImageToText:
             #print(end="\r" f"Frames: {img_counter} von {self.__frameCount}")
             self.PicToRGB(img)
             img_counter += 1
+        print("\n")
         print(bcolors.OKGREEN + "Convert: Complete" + bcolors.ENDC)
 
         with open(self.__savePath, "wb") as file:
             pickle.dump(self.charFrameSet, file)
 
     def Start(self):
-        with open("saves/BadApple", "rb") as file:
+        with open(self.__savePath, "rb") as file:
             self.charFrameSet = pickle.load(file)
 
         frameList = []
@@ -247,8 +250,8 @@ if __name__ == '__main__':
     #vid = VideoCapture('media/BadApple.mp4', 5)
     #vid.VideoToImages()
 
-    texter = ImageToText('./BadApple/', 6, 5)
-    #texter.WriteCharFramesToFile()
-    texter.Start()
+    texter = ImageToText('./Frames/BadApple/', 6, 5)
+    texter.WriteCharFramesToFile()
+    #texter.Start()
 
 
