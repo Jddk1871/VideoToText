@@ -3,9 +3,11 @@ import time
 import sys
 #import curses
 #from curses import wrapper
+import multiprocessing as mp
 
 
 class ProgressBar:
+    d = 0
     def __init__(self, maxSteps: int, barLenght: int):
         self.__maxSteps = maxSteps
         self.__barLenght = barLenght
@@ -49,8 +51,6 @@ class ProgressBar:
 
         print(end="\r")'''
 
-
-
 #print()
 #progressBar = ProgressBar(300, 10)
 
@@ -68,19 +68,22 @@ class ProgressBar:
 #    time.sleep(0.5)
 #print (a)
 
-
-
-def main(stdscr):
-    stdscr.clear()
-    stdscr.addstr(10, 10, "Hallo")
-    stdscr.refresh()
-    stdscr.getch()
+#def main(stdscr):
+#    stdscr.clear()
+#    stdscr.addstr(10, 10, "Hallo")
+#    stdscr.refresh()
+#    stdscr.getch()
 
 #wrapper(main)
 
+'''def t(a, x):
+    for i in range(1, 1001, 1):
+        pBar = ProgressBar(1000, 100)
+        pBar.progressBarMk2(i)
+
+        time.sleep(.05)
+
+t(1, 1)'''
 
 
 
-#for i in range(1, 101, 1):
-#    progressBar.progressBarMk2([i, i+100, i+200], 100)
-#    time.sleep(.05)

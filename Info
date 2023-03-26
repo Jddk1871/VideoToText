@@ -32,3 +32,26 @@ Komponenten / Verlauf:
     k. Den Datensatz an den entsprechenden stellen trennen (kp jeder frame startet mit nur nullern)
     (l). Entwerder die Frames encodieren und dann ausgeben oder on the fly. Mal schauen was mehr speicher und Leistung verbraucht
     m. Fertig
+
+
+
+Code Infos:
+
+ImageToText
+    - pic_to_rgb
+        -  # Chunk aufbau= y1: x1, x2, x3, x4, x5
+           #               y2: x1, x2, x3, x4, x5
+           #               y3: x1, x2, x3, x4, x5
+           #               y4: x1, x2, x3, x4, x5
+           #               y5: x1, x2, x3, x4, x5
+
+           old:
+           #row_sum = round(sum(row) / dim)
+           #if row_sum == 0:
+           #    row_sum = 0.1
+           #value_r = math.ceil(row_sum / (255 / len(self.charSet)))
+           #chunk_row += self.charSet[value_r - 1]
+
+
+
+

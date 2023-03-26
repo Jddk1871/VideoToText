@@ -1,5 +1,5 @@
 import cv2
-import multiprocessing as mp
+from multiprocessing import Pool
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 from sys import getsizeof
@@ -7,10 +7,9 @@ import math
 import pickle
 import os
 from time import sleep
+from time import time
+
 import ProgressBar
-
-
-
 
 
 class bcolors:
@@ -111,25 +110,19 @@ class ImageToText:
         self.__skip = skip  # Für die FPS, bekommt man von VideoToImages framesToSkip
         self.__frameList = self.GetImages()
         self.__chunk_dim = chunk
-        self.charSet = [' ', '.', '/', '%']
-        self.charSet = [' ', '"', ',', '(', 'S', '#', '@']
+        self.charSet = [' ', '.', '"', '/', '%']
+        # self.charSet = [' ', '"', ',', '(', 'S', '#', '@']
         self.charFrameSet = []
         self.__globalCounter = 0
 
-
     def WriteCharFramesToFile(self):
-        #for i in self.progressbar(range(15), "Computing: ", 40):
-        #    sleep(0.5)  # any code you need
         pBar = ProgressBar.ProgressBar(self.__frameCount, 50)
-        img_counter = 1
         print(bcolors.HEADER + "Convert Images to Char Images" + bcolors.ENDC)
-        print()
+        img_counter = 1
         for img in self.__frameList:
             pBar.progressBarMk2(img_counter)
-            #print(end="\r" f"Frames: {img_counter} von {self.__frameCount}")
-            self.PicToRGB(img)
+            self.charFrameSet.append(self.pic_to_rgb(img))
             img_counter += 1
-        print("\n")
         print(bcolors.OKGREEN + "Convert: Complete" + bcolors.ENDC)
 
         with open(self.__savePath, "wb") as file:
@@ -142,85 +135,39 @@ class ImageToText:
         frameList = []
 
         for frame in self.charFrameSet:
-            #sleep(.1)
+            # sleep(.1)
             frame1 = ""
             for row in frame:
-                #print(row)
-                frame1 += f"{row}"
+                # print(row)
+                frame1 += f"{row}\n"
             frameList.append(frame1)
 
         clear = lambda: os.system('cls')
         for frame in frameList:
-            #clear()
+            # clear()
             print(frame, flush=True)
             sleep(.1)
 
-
     def GetImages(self):
-        imgList = []
-        for frame in range(0, self.__frameCount * self.__skip):
-            if frame % self.__skip == 0 or frame == 0:
-                # print(frame)
-                img = cv2.imread(os.path.join(self.__path, f"{frame}.jpg"))
-                imgList.append(img)
+        imgList = [cv2.imread(os.path.join(self.__path, f"{frame}.jpg"))
+               for frame in range(0, self.__frameCount * self.__skip, self.__skip)]
         return imgList
 
-    def PicToRGB(self, img):
-        dim = self.__chunk_dim
-        # y, x
-        # print(img[599, 799])
-
+    def pic_to_rgb(self, img: list) -> list:
+        dim = self.__chunk_dim  # y, x print(img[599, 799])
         chunk_array = []
-        for y in range(0, img.shape[0]):
-            if y % dim == 0 or y == 0:
-                chunk_row = []
-                for x in range(0, img.shape[1]):
-                    if x % dim == 0 or x == 0:
-                        # Chunk aufbau= y1: x1, x2, x3, x4, x5
-                        #              y2: x1, x2, x3, x4, x5
-                        #              y3: x1, x2, x3, x4, x5
-                        #              y4: x1, x2, x3, x4, x5
-                        #              y5: x1, x2, x3, x4, x5
-                        chunk = img[y:y + dim, x:x + dim]
 
-                        # Bei der Addition ist zu beachten, das der Wertebereich 2^8 (rgb Wertebereich) deswegen /(chunk größe)
-                        row = chunk[0, :, 0] / dim + chunk[1, :, 0] / dim + chunk[2, :, 0] / dim + \
-                              chunk[3, :, 0] / dim + chunk[4, :, 0] / dim
-                        # print(row)
-                        row_sum = 0
-                        for rgb in row:
-                            row_sum += rgb
-                        row_sum = round(row_sum / dim)
-                        # print(row_sum)
-                        chunk_row.append(row_sum)
-                if y % 2 or y == 0:
-                    chunk_array.append(chunk_row)
-                    #print(y)
-        self.RGBToChar(RGB_set=chunk_array)
-
-    def RGBToChar(self, RGB_set):
-        #print(len(self.charSet))
-        calc = 255 / len(self.charSet)
-        char_array = []
-
-        for row in RGB_set:
-            char_row = []
-            string_row = ""
-            for value in row:
-                if value == 0: value = 0.1
-                value_r = math.ceil(value / calc)
-                # string_row = string_row.join("Das")
-                char_row.append(self.charSet[value_r-1])
-                #char_row.append(value_r - 1)
-                string_row += self.charSet[value_r-1]
-            #char_array.append(char_row)
-            char_array.append(string_row)
-
-        # for row in char_array:
-        #    print(row)
-        print(end="\r" + f"Frame: {self.__globalCounter} von {self.__frameCount}")
-        self.__globalCounter += 1
-        self.charFrameSet.append(char_array)
+        for y in range(0, img.shape[0], dim * 2):  # range(x, y, z) z nimmt jeden (z)ten eintrag
+            chunk_row = ""
+            for x in range(0, img.shape[1], dim):
+                chunk = img[y:y + dim, x:x + dim]
+                row = chunk[0, :, 0] / dim + chunk[1, :, 0] / dim + chunk[2, :, 0] / dim + \
+                      chunk[3, :, 0] / dim + chunk[4, :, 0] / dim  # Deswegen /(chunk größe) Wertebereich 2^8 rgb
+                row_sum = round(sum(row) / dim)
+                row_sum = max(1, math.ceil(row_sum / (255 / len(self.charSet))))
+                chunk_row += self.charSet[row_sum - 1]
+            chunk_array.append(chunk_row)
+        return chunk_array
 
 
 class ImageTester:
@@ -245,13 +192,10 @@ class ImageTester:
         print("Test images created")
 
 
-
 if __name__ == '__main__':
-    #vid = VideoCapture('media/BadApple.mp4', 5)
-    #vid.VideoToImages()
+    # vid = VideoCapture('media/BadApple.mp4', 5)
+    # vid.VideoToImages()
 
     texter = ImageToText('./Frames/BadApple/', 6, 5)
     texter.WriteCharFramesToFile()
-    #texter.Start()
-
-
+    texter.Start()
