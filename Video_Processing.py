@@ -3,8 +3,13 @@ import math
 import pickle
 import os
 import ProgressBar
+import Menu
 from time import sleep
-
+from prompt_toolkit import prompt
+from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.completion import PathCompleter
+from prompt_toolkit.shortcuts import clear
 
 class bcolors:
     HEADER = '\033[95m'
@@ -65,7 +70,7 @@ class VideoCapture:
 
         # Extrahieren von Frames aus dem Video
         while stream.isOpened():
-            pbar.progressBarMk2(current_frame)
+            pbar.progress_bar_mk2(current_frame)
             ret, frame = stream.read()
 
             # Wenn ein frame None ist, soll das ganze aufhören
@@ -107,7 +112,7 @@ class ImageToText:
         print("\n" + bcolors.HEADER + "Convert Images to Char Images" + bcolors.ENDC)
         img_counter = 1
         for img in self.frame_list:
-            pbar.progressBarMk2(img_counter)
+            pbar.progress_bar_mk2(img_counter)
             # Fügt das konvertierte Charakter-Image zur Liste hinzu
             self.char_frame_set.append(self.pic_to_rgb(img))
             img_counter += 1
@@ -120,10 +125,10 @@ class ImageToText:
     def start_playback(self):
         # Lädt die Charakter-Images aus der Datei
         with open(self.save_path, "rb") as file:
-            self.charFrameSet = pickle.load(file)
+            self.char_frame_set = pickle.load(file)
 
         # Gibt die Charakter-Images als Text aus
-        for frame in self.charFrameSet:
+        for frame in self.char_frame_set:
             for row in frame:
                 print(row)
             sleep(.1)
@@ -154,6 +159,24 @@ class ImageToText:
         return chunk_array  # Charakter-Images zurück gegeben
 
 
+class Player:
+    def __int__(self):
+        menu_items = ["Video Capture", "Create Savefile", "Play Savefile"]
+        WordCompleter(['file1.txt', 'file2.txt', 'file3.txt'])
+        path_default_frames = 'Frames/'
+        path_default_saves = 'saves/'
+
+    def get_path(self, items: list[str]) -> str:
+        # Übergibt, liste mit auswahlmöglichkeiten
+        file_path = prompt('Dateipfad: ', completer=WordCompleter(items))
+        print(f"Ausgewählte Datei: {file_path}")
+        return file_path
+
+    def frames_to_save(self):
+        vid = VideoCapture()
+
+
+
 if __name__ == '__main__':
     vid = VideoCapture('media/Uni.mp4', 5)
     vid.VideoToImages()
@@ -161,3 +184,10 @@ if __name__ == '__main__':
     texter = ImageToText('./Frames/Uni/', 6, 5)
     texter.write_char_frames_to_file()
     texter.start_playback()
+
+
+
+
+
+
+
