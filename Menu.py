@@ -12,7 +12,7 @@ menu_items = ["Option 1", "Option 2", "Datei auswählen", "Option 3"]
 file_completer = WordCompleter(['file1.txt', 'file2.txt', 'file3.txt'])
 current_directory = 'E:/'
 
-file_completer = PathCompleter(base_dir='E:/')
+file_completer = PathCompleter(file_completer)
 # Funktionen, die aufgerufen werden sollen
 def func_option1():
     print("Option 1 ausgewählt")

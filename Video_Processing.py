@@ -3,7 +3,7 @@ import math
 import pickle
 import os
 import ProgressBar
-import Menu
+#import Menu
 from time import sleep
 from prompt_toolkit import prompt
 from prompt_toolkit import PromptSession
@@ -133,7 +133,7 @@ class ImageToText:
                 print(row)
             sleep(.1)
 
-    def get_images(self):
+    def get_images(self) -> list:
         img_list = []
         for frame in range(0, self.frame_count * self.skip, self.skip):
             # Lädt das Bild mit dem angegebenen Dateinamen aus dem Ordner
@@ -159,31 +159,40 @@ class ImageToText:
         return chunk_array  # Charakter-Images zurück gegeben
 
 
-class Player:
-    def __int__(self):
-        menu_items = ["Video Capture", "Create Savefile", "Play Savefile"]
-        WordCompleter(['file1.txt', 'file2.txt', 'file3.txt'])
-        path_default_frames = 'Frames/'
-        path_default_saves = 'saves/'
+class Menu:
+    def __init__(self):
+        self.menu_items = ["Video Capture", "Create Savefile", "Play Savefile"]
+        self.file_completer = ['file1.txt', 'file2.txt', 'file3.txt']
+        self.path_default_frames = 'Frames/'
+        self.path_default_saves = 'saves/'
+        self.path_default_media = 'media/'
 
     def get_path(self, items: list[str]) -> str:
         # Übergibt, liste mit auswahlmöglichkeiten
-        file_path = prompt('Dateipfad: ', completer=WordCompleter(items))
+        file_path = prompt('Datei: ', completer=WordCompleter(items))
         print(f"Ausgewählte Datei: {file_path}")
         return file_path
 
     def frames_to_save(self):
-        vid = VideoCapture()
+        #print(self.file_completer)
+        path_file = self.get_path(items=self.file_completer)
+        fps = prompt('Ziel FPS: ')
+        #vid = VideoCapture(path=os.path.join(self.path_default_media, path_file))
+        t1 = os.path.join(self.path_default_media, path_file)
+        print(t1)
 
 
 
 if __name__ == '__main__':
-    vid = VideoCapture('media/Uni.mp4', 5)
-    vid.VideoToImages()
+    player = Menu()
+    player.frames_to_save()
 
-    texter = ImageToText('./Frames/Uni/', 6, 5)
-    texter.write_char_frames_to_file()
-    texter.start_playback()
+    #vid = VideoCapture('media/BadApple.mp4', 5)
+    #vid.VideoToImages()
+
+    #texter = ImageToText('./Frames/BadApple/', 6, 5)
+    #texter.write_char_frames_to_file()
+    #texter.start_playback()
 
 
 
