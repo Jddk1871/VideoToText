@@ -225,7 +225,7 @@ class Menu:
             elif option == self.menu_items[1]:
                 self.create_savefile()
             elif option == self.menu_items[2]:
-                print("Gibts auch noch nicht")
+                self.start_playback()
             elif option == self.menu_items[3]:
                 end_parm = False
             else:
@@ -298,18 +298,39 @@ class Menu:
         clear()
 
     def create_savefile(self):
+
         print(bcolors.HEADER + "Create savefile from images" + bcolors.ENDC)
         folder = self.get_path(info="Select folder", items=self.get_folder_content(self.path_default_frames))
         folder_path = os.path.join(self.path_default_frames, folder)
         info = self.read_metadata(folder)
         if self.get_folder_content(folder_path) and info != [0, 0]:
-            texter = ImageToText(folder_path, f"{self.path_default_saves}/{folder}.save", 6, 5)
+            texter = ImageToText(folder_path, f"{self.path_default_saves}/{folder}.save", info[1], info[0])
             texter.write_char_frames_to_file()
         else:
             print(bcolors.FAIL + "Folder is empty" + bcolors.ENDC)
         print("\n")
         input(bcolors.OKCYAN + "Press Enter to continue..." + bcolors.ENDC)
         clear()
+
+
+    def start_playback(self):
+        # Lädt die Charakter-Images aus der Datei
+        folder_info = self.get_folder_content(self.path_default_saves)
+        folder_save = []
+        for i in folder_info:
+            if str(i).find("save") > 0:
+                folder_save.append(i)
+
+        save_file = self.get_path(info="Select folder", items=folder_save)
+
+        with open(f"{self.path_default_saves}/{save_file}", "rb") as file:
+            self.char_frame_set = pickle.load(file)
+
+        # Gibt die Charakter-Images als Text aus
+        for frame in self.char_frame_set:
+            for row in frame:
+                print(row)
+            sleep(.1)
 
 
 if __name__ == '__main__':
