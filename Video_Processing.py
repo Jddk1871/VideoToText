@@ -3,14 +3,8 @@ import math
 import pickle
 import os
 import ProgressBar
-# import Menu
-import prompt_toolkit
 from time import sleep
-from prompt_toolkit import prompt
-from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import WordCompleter
-from prompt_toolkit.completion import PathCompleter
-from prompt_toolkit.shortcuts import clear
+import prompt_toolkit
 
 
 class bcolors:
@@ -166,7 +160,7 @@ class ImageToText:
 
 class Menu:
     def __init__(self):
-        self.menu_items = ["Video Capture", "Create Savefile", "Play Savefile", "End Programm"]
+        self.menu_items = ["Video Capture", "Create Savefile", "Play Savefile", "Info", "End Programm"]
         self.file_completer = ['file1.txt', 'file2.txt', 'file3.txt']
 
         self.media_content = []
@@ -216,7 +210,9 @@ class Menu:
     def menu(self):
         end_parm = True
         while end_parm:
+            prompt_toolkit.shortcuts.clear()
             print(bcolors.HEADER + "Menu:" + bcolors.ENDC)
+            print(bcolors.OKBLUE + "Use TAB to navigate " + bcolors.ENDC)
             for a in range(0, len(self.menu_items)):
                 print(bcolors.HEADER + f"{a + 1}. {self.menu_items[a]}" + bcolors.ENDC)
             option = self.get_path(items=self.menu_items, info="Option")
@@ -227,14 +223,16 @@ class Menu:
             elif option == self.menu_items[2]:
                 self.start_playback()
             elif option == self.menu_items[3]:
+                self.get_info()
+            elif option == self.menu_items[4]:
                 end_parm = False
             else:
-                clear()
+                prompt_toolkit.shortcuts.clear()
                 print("Falsche eingabe!")
 
     def get_path(self, info: str, items: list[str]) -> str:
         # Übergibt, liste mit auswahlmöglichkeiten
-        file_path = prompt(info + ': ', completer=WordCompleter(items))
+        file_path = prompt_toolkit.prompt(info + ': ', completer=prompt_toolkit.completion.WordCompleter(items))
         return file_path
 
     def get_folder_content(self, folder_path: str) -> list:
@@ -264,6 +262,7 @@ class Menu:
     def video_to_frames(self):
 
         print(bcolors.HEADER + "Convert Video to frames" + bcolors.ENDC)
+        print(bcolors.OKBLUE + "Videos must be in /media" + bcolors.ENDC)
         # print(self.file_completer)
         path_file = self.get_path(items=self.media_content, info="Videodatei")
         fps = 0
@@ -295,7 +294,7 @@ class Menu:
 
         print("\n")
         input(bcolors.OKCYAN + "Press Enter to continue..." + bcolors.ENDC)
-        clear()
+        prompt_toolkit.shortcuts.clear()
 
     def create_savefile(self):
 
@@ -310,7 +309,7 @@ class Menu:
             print(bcolors.FAIL + "Folder is empty" + bcolors.ENDC)
         print("\n")
         input(bcolors.OKCYAN + "Press Enter to continue..." + bcolors.ENDC)
-        clear()
+        prompt_toolkit.shortcuts.clear()
 
 
     def start_playback(self):
@@ -331,6 +330,24 @@ class Menu:
             for row in frame:
                 print(row)
             sleep(.1)
+
+    def get_info(self):
+        print(bcolors.HEADER + "Info Tab" + bcolors.ENDC)
+
+        print(bcolors.OKGREEN + "Video Capture: \t Takes a video and extracts the frames based on a "
+                                "user set frame rate,"
+                                " \n\t\t also generates a .inf file that is required to create a save from the frames. "
+              + bcolors.ENDC)
+        print(bcolors.OKGREEN + "\nCreate Savefile: Takes the previews created frames and the .inf file to create a"
+                                " \n\t\t monolithic save file of the final output. (the compression isn't that good)"
+              + bcolors.ENDC)
+        print(bcolors.OKGREEN + "\nPlay Savefile:   Takes the previews created .save file and outputs it"
+                                " \n\t\t simple as that."
+              + bcolors.ENDC)
+        print(bcolors.OKGREEN + "\nRequirements: \t Pillow, opencv-python, prompt-toolkit" + bcolors.ENDC)
+
+        input(bcolors.OKCYAN + "Press Enter to continue..." + bcolors.ENDC)
+        prompt_toolkit.shortcuts.clear()
 
 
 if __name__ == '__main__':
