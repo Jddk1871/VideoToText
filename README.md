@@ -42,8 +42,8 @@ Komponenten / Verlauf:
 Code Infos:
 
 ImageToText
-    - pic_to_rgb
-        -  # Chunk aufbau= y1: x1, x2, x3, x4, x5
+           pic_to_rgb:
+           # Chunk aufbau= y1: x1, x2, x3, x4, x5
            #               y2: x1, x2, x3, x4, x5
            #               y3: x1, x2, x3, x4, x5
            #               y4: x1, x2, x3, x4, x5
