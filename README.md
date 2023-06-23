@@ -12,7 +12,7 @@ Repo clonen und Start_Projekt.bat ausführen, sollte den rest von sich aus mache
 
 
 
-
+## Eigene Anmerkungen 
 
 Komponenten / Verlauf:
 
