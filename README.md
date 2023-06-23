@@ -4,6 +4,16 @@ Video zu Text Konverter
 
 Python 3.11
 
+## Setup
+
+Repo clonen und Start_Projekt.bat ausführen, sollte den rest von sich aus machen. 
+-> Es muss Python auf dem System installiert sein und in PATH, ansonsten in der .bat datei rein schreiben wo venv erstellt wird
+
+
+
+
+
+
 Komponenten / Verlauf:
 
 1. Ein Video nehmen und dieses Verkleinern / skalieren
