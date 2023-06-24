@@ -50,4 +50,4 @@ pause
 	)
 )
 
-.\%folder%\Scripts\python.exe .\Video_Processing.py
+.\%folder%\Scripts\python.exe .\Video_zu_Text\Video_Processing.py
