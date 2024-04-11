@@ -167,15 +167,15 @@ class Menu:
         self.save_content = []
         self.frame_folder = []
 
-        self.path_default_frames = 'Video_zu_Text/Frames'
+        self.path_default_frames = 'old/Frames'
         self.path_default_frames_add = True
-        self.path_default_saves = 'Video_zu_Text/saves'
-        self.path_default_media = 'Video_zu_Text/media'
+        self.path_default_saves = 'old/saves'
+        self.path_default_media = 'old/media'
 
     def load_config(self):
         print(bcolors.HEADER + "Load config file" + bcolors.ENDC)
         try:
-            with open("../config.conf", "r") as config:
+            with open("config.conf", "r") as config:
                 for line in config:
                     var = line.split('=')
                     if var[0] == "path_default_frames":
