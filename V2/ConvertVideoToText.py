@@ -98,7 +98,8 @@ def get_char_set(char_input: str) -> str:
     else:
         ascii_set = main_char_set
 
-    return ascii_set
+    # invert list
+    return ascii_set[::-1]
 
 
 if __name__ == "__main__":
