@@ -44,7 +44,7 @@ def convert_video_frames(path: str, target_fps: int | None, char_line_width: int
 
 def convert_frame_to_ascii(image, dim: (int, int), chunk_size: int) -> list[str]:
     frame: list[str] = []
-    for y in range(0, dim[0], chunk_size*2):
+    for y in range(0, dim[0], chunk_size * 2):
         line = ""
         for x in range(0, dim[1], chunk_size):
             chunk = image[y:y + chunk_size, x:x + chunk_size]
@@ -59,10 +59,10 @@ def convert_frame_to_ascii(image, dim: (int, int), chunk_size: int) -> list[str]
     return frame
 
 
-def brightness_to_ascii(brightness):
-    ascii_chars = '@%#*+=-:. '
-    index = int((brightness / 255) * (len(ascii_chars) - 1))
-    return ascii_chars[index]
+def brightness_to_ascii(brightness: float):
+    global ascii_char_set
+    index = int((brightness / 255) * (len(ascii_char_set) - 1))
+    return ascii_char_set[index]
 
 
 def display_frame(ascii_frame: list[str], start_time: float, fps: int):
@@ -80,8 +80,25 @@ def display_frame(ascii_frame: list[str], start_time: float, fps: int):
 
     print(f'\nCompute time: {execution_time:.4f} / {(execution_time / (target_delay / 100)):.2f}% | Target delay: '
           f'{target_delay:.4f} | Extra delay: {full_delay:.4f} | Skipped frames: {skipped_frames}     ')
-    print(f"\033[{len(ascii_frame)+2}A", end="")
+    print(f"\033[{len(ascii_frame) + 2}A", end="")
     time.sleep(full_delay)
+
+
+def get_char_set(char_input: str) -> str:
+    ascii_set: str
+    char_sets = {
+        'default': '@%#*+=-:. ',
+        'extended': '█$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\'. '
+    }
+
+    if main_char_set is None:
+        ascii_set = char_sets['default']
+    elif main_char_set and main_char_set in char_sets:
+        ascii_set = char_sets[main_char_set]
+    else:
+        ascii_set = main_char_set
+
+    return ascii_set
 
 
 if __name__ == "__main__":
@@ -91,16 +108,19 @@ if __name__ == "__main__":
     parser.add_argument("--width", dest="width", help="target width in char len. "
                                                       "80: 1 line is 80 characters long", required=False)
     parser.add_argument("--chunk_size", dest="chunk_size", help="Chunk size", required=False)
+    parser.add_argument("--char_set", dest="char_set", help="default, extended, custom z.B. = #+ü-.)", required=False)
 
     args = parser.parse_args()
 
     main_path: str = args.file
-    main_fps: int | None = int(args.fps) if args.fps is not None else None
-    main_width: int | None = int(args.width) if args.width is not None else None
-    main_chunk_size: int | None = int(args.chunk_size) if args.chunk_size is not None else None
+    main_fps: int | None = int(args.fps) if args.fps else None
+    main_width: int | None = int(args.width) if args.width else None
+    main_chunk_size: int | None = int(args.chunk_size) if args.chunk_size else None
+    main_char_set: str | None = str(args.char_set).lower() if args.char_set else None
 
     # global vars
     skipped_frames: int = 0
+    ascii_char_set: str = get_char_set(main_char_set)
 
     if not os.path.exists(main_path):
         print("Invalid file name")
