@@ -5,7 +5,7 @@ Just a simple Python script to show black and white videos in the console
 
 ## Use 
 ````
-py ConvertVideoToText.py --file "path\to\video.mp4"
+py VideoToText.py --file "path\to\video.mp4"
 ````
 
 ## Optionen
